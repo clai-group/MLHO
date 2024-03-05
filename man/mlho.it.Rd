@@ -13,11 +13,14 @@ mlho.it(
   MSMR.sparsity = 0.005,
   MSMR.jmi = TRUE,
   MSMR.topn = 200,
+  MSMR.encounterLevel = FALSE,
+  MSMR.valuesToMerge = FALSE,
   mlearn.save.model = FALSE,
   mlearn.note = "mlho_phewas run",
   mlearn.aoi = "demo",
   mlearn.cv = "cv",
   mlearn.nfold = 5,
+  mlearn.calSHAP = FALSE,
   multicore = FALSE,
   preProc = TRUE,
   iterations = 5
@@ -40,6 +43,10 @@ mlho.it(
 
 \item{MSMR.topn}{MSMR.lite parameter}
 
+\item{MSMR.encounterLevel}{MSMR.lite parameter}
+
+\item{MSMR.valuesToMerge}{MSMR.lite parameter}
+
 \item{mlearn.save.model}{mlearn parameter}
 
 \item{mlearn.note}{mlearn parameter}
@@ -49,6 +56,8 @@ mlho.it(
 \item{mlearn.cv}{mlearn parameter}
 
 \item{mlearn.nfold}{mlearn parameter}
+
+\item{mlearn.calSHAP}{mlearn parameter}
 
 \item{multicore}{if you want to parallelize the process}
 

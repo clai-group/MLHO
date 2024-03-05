@@ -74,7 +74,7 @@ mlho.it <- function(dbmart,
   uniqpats.train <- c(as.character(unique(dat.train$patient_num)))
 
   ##here is the application of MSMR.lite
-  dat.train <- MSMSR.lite(MLHO.dat=dat.train,
+  dat.train <- MSMR.lite(MLHO.dat=dat.train,
                           patients = uniqpats.train,
                           sparsity=MSMR.sparsity,
                           labels,
@@ -88,7 +88,7 @@ mlho.it <- function(dbmart,
 
   uniqpats.test <- c(as.character(unique(dat.test$patient_num)))
 
-  dat.test <- MSMSR.lite(MLHO.dat=dat.test,patients = uniqpats.test,sparsity=NA,jmi = FALSE,labels,binarize=MSMR.binarize)
+  dat.test <- MSMR.lite(MLHO.dat=dat.test,patients = uniqpats.test,sparsity=NA,jmi = FALSE,labels,binarize=MSMR.binarize)
 
 
   if(!is.null(dems)){

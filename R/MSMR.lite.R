@@ -15,7 +15,7 @@
 #' @export
 #'
 
-MSMSR.lite <- function(MLHO.dat,
+MSMR.lite <- function(MLHO.dat,
                        labels,
                        binarize=FALSE,
                        sparsity=NA,

@@ -15,7 +15,8 @@ mlearn(
   nfold = 5,
   aoi = "label",
   multicore = FALSE,
-  preProc = TRUE
+  preProc = TRUE,
+  calSHAP = FALSE
 )
 }
 \arguments{
@@ -40,6 +41,8 @@ mlearn(
 \item{multicore}{do you want to parallelize the process?}
 
 \item{preProc}{preprocessig on the train data or not}
+
+\item{calSHAP}{calculating SHAP value or not, the default is false}
 }
 \description{
 the MLHO ML training and testing

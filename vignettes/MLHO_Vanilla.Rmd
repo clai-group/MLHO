@@ -74,13 +74,13 @@ dat.train$value.var <- 1
 uniqpats.train <- c(as.character(unique(dat.train$patient_num)))
 
 ##here is the application of MSMR.lite
-dat.train <- MSMSR.lite(MLHO.dat=dat.train,
+dat.train <- MSMR.lite(MLHO.dat=dat.train,
                         patients = uniqpats.train,
                         sparsity=0.005, 
                         labels = labeldt,
                         topn=200)
 ```
-Notice that we are removing concepts that had prevalence less than 0.5% and then only taking the top 200 after the JMI rankings. See help (`?mlho::MSMSR.lite`) for `MSMR.lite` parameters. 
+Notice that we are removing concepts that had prevalence less than 0.5% and then only taking the top 200 after the JMI rankings. See help (`?mlho::MSMR.lite`) for `MSMR.lite` parameters. 
 
 Now we have the training data with the top 200 features, to which we can add demographic features. Now on to prepping the test set:
 ```{r}
@@ -90,7 +90,7 @@ dat.test[,row := .I]
 dat.test$value.var <- 1
 uniqpats.test <- c(as.character(unique(dat.test$patient_num)))
 
-dat.test <- MSMSR.lite(MLHO.dat=dat.test,patients = uniqpats.test,sparsity=NA,jmi = FALSE,labels = labeldt)
+dat.test <- MSMR.lite(MLHO.dat=dat.test,patients = uniqpats.test,sparsity=NA,jmi = FALSE,labels = labeldt)
 ```
 Here notice that we only used `MSMR.lite` to generate the wide table that matches to the `dat.train` table.
 
