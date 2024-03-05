@@ -11,10 +11,12 @@
 #' @param cv cross validatio method
 #' @param nfold nfold cross validation folds
 #' @param preProc preprocessig on the train data or not
+#' @param calSHAP calculating SHAP value or not, the default is false
 #'
 #' @return
 #' @export
 #'
+
 mlearn <- function(dat.train,
                    dat.test,
                    dems = NULL,
@@ -25,7 +27,8 @@ mlearn <- function(dat.train,
                    nfold=5,
                    aoi="label",
                    multicore=FALSE,
-                   preProc=TRUE)
+                   preProc=TRUE,
+                   calSHAP=FALSE)
 {
 
   if(multicore==TRUE){
@@ -155,7 +158,17 @@ mlearn <- function(dat.train,
       saveRDS(model, paste0(getwd(),"/results/model_",classifier,"_",note,"_",aoi,".rds"))
     }
 
+    shap_val <- data.frame()
+    if(calSHAP ==TRUE){
+      explain <- DALEX::explain(model,
+                                data = dat.train,
+                                y = as.numeric(dat.train[[aoi]]),
+                                label = classifier)
 
+      shap_val <- predict_parts(explainer = explain,
+                                new_observation =  dat.test[, !names(dat.test) %in% aoi],
+                                type = "shap")
+    }
 
 
     return(list(
@@ -163,7 +176,8 @@ mlearn <- function(dat.train,
       features=coefficients,
       calibrations=cali,
       AE=err,
-      missing.features=test.miss
+      missing.features=test.miss,
+      shap = shap_val
     ))
   }
 
@@ -220,9 +234,8 @@ mlearn <- function(dat.train,
     }
 
 
-
-
-    return(features=output)
+    return(
+      features=output
+    )
   }
 }
-

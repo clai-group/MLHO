@@ -26,7 +26,7 @@ Install and load the required packages:
 if(!require(pacman)) install.packages("pacman")
 
 pacman::p_load(data.table, devtools, backports, Hmisc, tidyr,dplyr,ggplot2,plyr,scales,readr,
-               httr, DT, lubridate, tidyverse,reshape2,foreach,doParallel,caret,gbm,lubridate,praznik)
+               httr, DT, lubridate, tidyverse,reshape2,foreach,doParallel,caret,gbm,lubridate,praznik, DALEX)
 ```
 
 ## MLHO Vanilla implementation
@@ -107,7 +107,8 @@ model.test <- mlearn(dat.train,
                    cv="cv",
                    nfold=5,
                    aoi="prediabetes",
-                   multicore=FALSE)
+                   multicore=FALSE,
+                   calSHAP = TRUE)
 
 ```
 try `?mlho::mlearn` to learn more about `mlearn` parameters. 
@@ -124,14 +125,13 @@ outputs of `mlearn` include:
 * final important features, which can be pulled and save from `model.test$features`
 * absolute errors for each patients using `model.test$AE`
 * missing important features `model.test$missing.features`
-
+* SHAP values `model.test$shap`
 
 For instance, only the following `r nrow(model.test$features)` features were used in phenotyping the `prediabetes`:
 
 ```{r}
 model.test$features
 ```
-
 
 *we recommend iterating the training and testing and storing the coefficients in a directory.*
 
@@ -163,6 +163,21 @@ now visualizing feature importance
     labs(y="Feature importance",x=""))
 ```
 
+## SHAP value and visualization
+When setting `calSHAP=TRUE`, SHAP values are also calculated to explain the output of models as shown below. 
+
+```{r}
+shap_value <- model.test$shap
+as.data.frame(shap_value)
+```
+
+Using the default plot function, the feature importance are shown below. 
+```{r}
+# shap_value <- data.frame(merge(shap_value,dbmart.concepts,by.x="variable_name",by.y = "phenx"))
+# shap_value <- shap_value %>% select(-variable)
+# names(shap_value)[names(shap_value) == 'DESCRIPTION'] <- 'variable'
+plot(shap_value, max_features= 20)
+```
 
 
 

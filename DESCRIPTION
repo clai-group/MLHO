@@ -1,9 +1,9 @@
 Package: mlho
 Type: Package
 Title: Machine Learning for Health Outcomes (MLHO)
-Version: 0.1.0
+Version: 0.1.1
 Author: Hossein Estiri <estiri.hossein@gmail.com>
-Maintainer: Hossein Estiri <estiri.hossein@gmail.com>
+Maintainer: Hossein Estiri <estiri.hossein@gmail.com>, Jiazi Tian <jtian6@mgh.harvard.edu>, Jonas Hügel <jonas.huegel@med.uni-goettingen.de>
 Description: This package provides tools and functions to implement the MLHO (pronounced as melo) pipeline.
     MLHO is an end-to-end Machine Learning pipeline that implements iterative sequential representation mining and feature and model selection to predict health outcomes.
 Depends: R (>= 3.1.0)
@@ -16,7 +16,7 @@ Suggests:
     knitr,
     rmarkdown,
     testthat (>= 3.0.0)
-Imports: tidytext, ggplot2, reshape2, plyr, lubridate,stringr,tidyverse, readr,DT, data.table,dplyr, devtools,data.table,Hmisc,scales,viridis, tidyr, mboost, caret, pROC, PRROC, ModelMetrics,reshape2, foreach, doParallel, easypackages, praznik
-URL: https://github.com/hestiri/mlho
-BugReports: https://github.com/hestiri/mlho/issues
+Imports: tidytext, ggplot2, reshape2, plyr, lubridate,stringr,tidyverse, readr,DT, data.table,dplyr, devtools,data.table,Hmisc,scales,viridis, tidyr, mboost, caret, pROC, PRROC, ModelMetrics,reshape2, foreach, doParallel, easypackages, praznik, DALEX
+URL: https://github.com/clai-group/MLHO
+BugReports: https://github.com/clai-group/MLHO/issues
 Config/testthat/edition: 3

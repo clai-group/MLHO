@@ -10,11 +10,14 @@
 #' @param MSMR.sparsity MSMR.lite parameter
 #' @param MSMR.jmi MSMR.lite parameter
 #' @param MSMR.topn MSMR.lite parameter
+#' @param MSMR.encounterLevel MSMR.lite parameter
+#' @param MSMR.valuesToMerge MSMR.lite parameter
 #' @param mlearn.save.model mlearn parameter
 #' @param mlearn.note mlearn parameter
 #' @param mlearn.aoi mlearn parameter
 #' @param mlearn.cv mlearn parameter
 #' @param mlearn.nfold mlearn parameter
+#' @param mlearn.calSHAP mlearn parameter
 #' @param iterations number of iterations you want. recommended at least 5. needs to be numeric
 #'
 #' @return
@@ -28,11 +31,14 @@ mlho.it <- function(dbmart,
                   MSMR.sparsity=0.005,
                   MSMR.jmi=TRUE,
                   MSMR.topn=200,
+                  MSMR.encounterLevel=FALSE,
+                  MSMR.valuesToMerge=FALSE,
                   mlearn.save.model=FALSE,
                   mlearn.note="mlho_phewas run",
                   mlearn.aoi="demo",
                   mlearn.cv="cv",
                   mlearn.nfold=5,
+                  mlearn.calSHAP=FALSE,
                   multicore=FALSE,
                   preProc=TRUE,
                   iterations=5)
@@ -74,7 +80,9 @@ mlho.it <- function(dbmart,
                           labels,
                           topn=MSMR.topn,
                           jmi=MSMR.jmi,
-                          binarize=MSMR.binarize
+                          binarize=MSMR.binarize,
+                          encounterLevel=MSMR.encounterLevel,
+                          valuesToMerge=MSMR.valuesToMerge
                           )
   dat.test <- subset(dat.test,dat.test$phenx %in% colnames(dat.train))
 
@@ -96,7 +104,8 @@ mlho.it <- function(dbmart,
                     note=paste0(mlearn.note," ",i),
                     cv=mlearn.cv,
                     nfold=mlearn.nfold,
-                    aoi=mlearn.aoi)
+                    aoi=mlearn.aoi,
+                    calSHAP=mlearn.calSHAP)
 
 
   dbmart.concepts <- dbmart[!duplicated(paste0(dbmart$phenx)), c("phenx","DESCRIPTION")]
