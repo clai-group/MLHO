@@ -24,27 +24,27 @@
 #' @export
 #'
 mlho.it <- function(dbmart,
-                  labels = labeldt,
-                  dems = NULL,
-                  test.sample = 30,
-                  MSMR.binarize=FALSE,
-                  MSMR.sparsity=0.005,
-                  MSMR.jmi=TRUE,
-                  MSMR.topn=200,
-                  MSMR.encounterLevel=FALSE,
-                  MSMR.valuesToMerge=FALSE,
-                  mlearn.save.model=FALSE,
-                  mlearn.note="mlho_phewas run",
-                  mlearn.aoi="demo",
-                  mlearn.cv="cv",
-                  mlearn.nfold=5,
-                  mlearn.calSHAP=FALSE,
-                  multicore=FALSE,
-                  preProc=TRUE,
-                  iterations=5)
+                    labels = labeldt,
+                    dems = NULL,
+                    test.sample = 30,
+                    MSMR.binarize=FALSE,
+                    MSMR.sparsity=0.005,
+                    MSMR.jmi=TRUE,
+                    MSMR.topn=200,
+                    MSMR.encounterLevel=FALSE,
+                    MSMR.valuesToMerge=FALSE,
+                    mlearn.save.model=FALSE,
+                    mlearn.note="mlho_phewas run",
+                    mlearn.aoi="demo",
+                    mlearn.cv="cv",
+                    mlearn.nfold=5,
+                    mlearn.calSHAP=FALSE,
+                    multicore=FALSE,
+                    preProc=TRUE,
+                    iterations=5)
 {
 
-    if(multicore==TRUE){
+  if(multicore==TRUE){
     ###setup parallel backend
     cores<-detectCores()
     cl <- makeCluster(cores[1]-2)
@@ -53,71 +53,71 @@ mlho.it <- function(dbmart,
 
   feats <- list()
   for (i in 1:iterations){
-  tryCatch({
-    print(paste0("iteration ",i))
+    tryCatch({
+      print(paste0("iteration ",i))
 
-  uniqpats <- c(as.character(unique(dbmart$patient_num)))
-  #
-  test_ind <- sample(uniqpats,
-                     round((test.sample/100)*length(uniqpats)))
+      uniqpats <- c(as.character(unique(dbmart$patient_num)))
+      #
+      test_ind <- sample(uniqpats,
+                         round((test.sample/100)*length(uniqpats)))
 
-  test_labels <- subset(labels,labels$patient_num %in% c(test_ind))
-  # print("test set lables:")
-  table(test_labels$label)
-  train_labels <- subset(labels,!(labels$patient_num %in% c(test_ind)))
-  # print("train set lables:")
-  table(train_labels$label)
-  # train and test sets
-  dat.train  <- subset(dbmart,!(dbmart$patient_num %in% c(test_ind)))
-  dat.test <- subset(dbmart,dbmart$patient_num %in% c(test_ind))
+      test_labels <- subset(labels,labels$patient_num %in% c(test_ind))
+      # print("test set lables:")
+      table(test_labels$label)
+      train_labels <- subset(labels,!(labels$patient_num %in% c(test_ind)))
+      # print("train set lables:")
+      table(train_labels$label)
+      # train and test sets
+      dat.train  <- subset(dbmart,!(dbmart$patient_num %in% c(test_ind)))
+      dat.test <- subset(dbmart,dbmart$patient_num %in% c(test_ind))
 
-  uniqpats.train <- c(as.character(unique(dat.train$patient_num)))
+      uniqpats.train <- c(as.character(unique(dat.train$patient_num)))
 
-  ##here is the application of MSMR.lite
-  dat.train <- MSMR.lite(MLHO.dat=dat.train,
-                          patients = uniqpats.train,
-                          sparsity=MSMR.sparsity,
-                          labels,
-                          topn=MSMR.topn,
-                          jmi=MSMR.jmi,
-                          binarize=MSMR.binarize,
-                          encounterLevel=MSMR.encounterLevel,
-                          valuesToMerge=MSMR.valuesToMerge
-                          )
-  dat.test <- subset(dat.test,dat.test$phenx %in% colnames(dat.train))
+      ##here is the application of MSMR.lite
+      dat.train <- MSMR.lite(MLHO.dat=dat.train,
+                             patients = uniqpats.train,
+                             sparsity=MSMR.sparsity,
+                             labels,
+                             topn=MSMR.topn,
+                             jmi=MSMR.jmi,
+                             binarize=MSMR.binarize,
+                             encounterLevel=MSMR.encounterLevel,
+                             valuesToMerge=MSMR.valuesToMerge
+      )
+      dat.test <- subset(dat.test,dat.test$phenx %in% colnames(dat.train))
 
-  uniqpats.test <- c(as.character(unique(dat.test$patient_num)))
+      uniqpats.test <- c(as.character(unique(dat.test$patient_num)))
 
-  dat.test <- MSMR.lite(MLHO.dat=dat.test,patients = uniqpats.test,sparsity=NA,jmi = FALSE,labels,binarize=MSMR.binarize)
-
-
-  if(!is.null(dems)){
-    dat.train <- merge(dat.train,dems, by="patient_num")
-    dat.test <- merge(dat.test,dems, by="patient_num")
-    }
-
-  model.i <- mlearn(dat.train,
-                    dat.test,
-                    dems=dems,
-                    save.model=mlearn.save.model,
-                    classifier="glmboost",
-                    note=paste0(mlearn.note," ",i),
-                    cv=mlearn.cv,
-                    nfold=mlearn.nfold,
-                    aoi=mlearn.aoi,
-                    calSHAP=mlearn.calSHAP)
+      dat.test <- MSMR.lite(MLHO.dat=dat.test,patients = uniqpats.test,sparsity=NA,jmi = FALSE,labels,binarize=MSMR.binarize)
 
 
-  dbmart.concepts <- dbmart[!duplicated(paste0(dbmart$phenx)), c("phenx","DESCRIPTION")]
-  mlho.features <- data.frame(merge(model.i$features,dbmart.concepts,by.x="features",by.y = "phenx"))
-  mlho.features$iteration <- i
-  mlho.features$model.i.roc <- model.i$ROC$roc
-  colnames(mlho.features)[2] <- "OR"
+      if(!is.null(dems)){
+        dat.train <- merge(dat.train,dems, by="patient_num")
+        dat.test <- merge(dat.test,dems, by="patient_num")
+      }
 
-  feats[[i]] <- mlho.features
-  rm(mlho.features)
-  },
-  error = function(fr) {cat("ERROR :",conditionMessage(fr), "\n")})
+      model.i <- mlearn(dat.train,
+                        dat.test,
+                        dems=dems,
+                        save.model=mlearn.save.model,
+                        classifier="glmboost",
+                        note=paste0(mlearn.note," ",i),
+                        cv=mlearn.cv,
+                        nfold=mlearn.nfold,
+                        aoi=mlearn.aoi,
+                        calSHAP=mlearn.calSHAP)
+
+
+      dbmart.concepts <- dbmart[!duplicated(paste0(dbmart$phenx)), c("phenx","DESCRIPTION")]
+      mlho.features <- data.frame(merge(model.i$features,dbmart.concepts,by.x="features",by.y = "phenx"))
+      mlho.features$iteration <- i
+      mlho.features$model.i.roc <- model.i$ROC$roc
+      colnames(mlho.features)[2] <- "OR"
+
+      feats[[i]] <- mlho.features
+      rm(mlho.features)
+    },
+    error = function(fr) {cat("ERROR :",conditionMessage(fr), "\n")})
     print(paste0("iteration ",i, " done!"))
     # closeAllConnections()
   }
