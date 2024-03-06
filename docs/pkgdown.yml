@@ -4,5 +4,8 @@ pkgdown_sha: ~
 articles:
   MLHO_Vanilla: MLHO_Vanilla.html
   MLHO_for_PheWAS: MLHO_for_PheWAS.html
-last_built: 2024-03-06T19:52Z
+last_built: 2024-03-06T20:17Z
+urls:
+  reference: https://clai-group.github.io/MLHO/reference
+  article: https://clai-group.github.io/MLHO/articles
 
