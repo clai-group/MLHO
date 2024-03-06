@@ -1,7 +1,7 @@
 ---
 title: "MLHO Vanilla"
-author: Hossein Estiri
-date: Nov. 5th 2021
+author: Hossein Estiri, Jiazi Tian
+date: Mar. 5th 2024
 output: rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{MLHO Vanilla}
@@ -168,7 +168,7 @@ When setting `calSHAP=TRUE`, SHAP values are also calculated to explain the outp
 
 ```{r}
 shap_value <- model.test$shap
-as.data.frame(shap_value)
+head(as.data.frame(shap_value))
 ```
 
 Using the default plot function, the feature importance are shown below. 

@@ -23,10 +23,10 @@ MLHO (pronounced as melo) is a thinkin' Machine Learning framework that implemen
 
 ## Installation
 
-You can install the released version of mlho from [Github](https://https://github.com/hestiri/mlho) with:
+You can install the released version of mlho from [Github](https://github.com/clai-group/MLHO) with:
 
 ``` r
-devtools::install_github("hestiri/mlho")
+devtools::install_github("clai-group/mlho")
 ```
 
 ## Data model
@@ -65,6 +65,6 @@ knitr::kable(
 ```
 
 
-see the instructions on how to use the MLHO package [on the articles page](https://hestiri.github.io/mlho/articles/) 
+see the instructions on how to use the MLHO package [on the articles page](https://clai-group.github.io/mlho/articles/) 
 
 

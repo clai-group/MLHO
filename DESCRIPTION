@@ -10,13 +10,41 @@ Depends: R (>= 3.1.0)
 License: LGPL (>= 2.0, < 3) | Mozilla Public License
 Encoding: UTF-8
 LazyData: true
-RoxygenNote: 7.2.3
+RoxygenNote: 7.3.1
 VignetteBuilder: knitr
 Suggests: 
     knitr,
     rmarkdown,
     testthat (>= 3.0.0)
-Imports: tidytext, ggplot2, reshape2, plyr, lubridate,stringr,tidyverse, readr,DT, data.table,dplyr, devtools,data.table,Hmisc,scales,viridis, tidyr, mboost, caret, pROC, PRROC, ModelMetrics,reshape2, foreach, doParallel, easypackages, praznik, DALEX
+Imports: 
+    tidytext,
+    ggplot2,
+    reshape2,
+    plyr,
+    lubridate,
+    stringr,
+    tidyverse,
+    readr,
+    DT,
+    data.table,
+    dplyr,
+    devtools,
+    data.table,
+    Hmisc,
+    scales,
+    viridis,
+    tidyr,
+    mboost,
+    caret,
+    pROC,
+    PRROC,
+    ModelMetrics,
+    reshape2,
+    foreach,
+    doParallel,
+    easypackages,
+    praznik,
+    DALEX
 URL: https://github.com/clai-group/MLHO
 BugReports: https://github.com/clai-group/MLHO/issues
 Config/testthat/edition: 3

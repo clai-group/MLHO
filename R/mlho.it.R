@@ -1,10 +1,8 @@
 #' iterative modeling with MLHO
 #'
-#' @param multicore if you want to parallelize the process
-#' @param dems table containing the demographic variables
-#' @param preProc preprocessig on the train data or not
 #' @param dbmart dbmart table
 #' @param labels should be the labeldt table
+#' @param dems table containing the demographic variables
 #' @param test.sample put 20 if you want to use 20 percent for testing and 80 percent for training
 #' @param MSMR.binarize MSMR.lite parameter
 #' @param MSMR.sparsity MSMR.lite parameter
@@ -18,11 +16,14 @@
 #' @param mlearn.cv mlearn parameter
 #' @param mlearn.nfold mlearn parameter
 #' @param mlearn.calSHAP mlearn parameter
+#' @param multicore if you want to parallelize the process
+#' @param preProc preprocessig on the train data or not
 #' @param iterations number of iterations you want. recommended at least 5. needs to be numeric
 #'
 #' @return
 #' @export
 #'
+
 mlho.it <- function(dbmart,
                     labels = labeldt,
                     dems = NULL,

@@ -16,10 +16,10 @@ model selection to predict health outcomes.
 ## Installation
 
 You can install the released version of mlho from
-[Github](https://https://github.com/hestiri/mlho) with:
+[Github](https://github.com/clai-group/MLHO) with:
 
 ``` r
-devtools::install_github("hestiri/mlho")
+devtools::install_github("clai-group/mlho")
 ```
 
 ## Data model
@@ -53,4 +53,4 @@ model, for instance, this column is the equivalent of `concept_cd`.
 | character    | character | character | character |
 
 see the instructions on how to use the MLHO package [on the articles
-page](https://hestiri.github.io/mlho/articles/)
+page](https://clai-group.github.io/mlho/articles/)
