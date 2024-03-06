@@ -45,6 +45,6 @@ Imports:
     easypackages,
     praznik,
     DALEX
-URL: https://github.com/clai-group/MLHO
+URL: https://github.com/clai-group/MLHO, https://clai-group.github.io/MLHO/
 BugReports: https://github.com/clai-group/MLHO/issues
 Config/testthat/edition: 3

@@ -53,4 +53,4 @@ model, for instance, this column is the equivalent of `concept_cd`.
 | character    | character | character | character |
 
 see the instructions on how to use the MLHO package [on the articles
-page](https://clai-group.github.io/mlho/articles/)
+page](https://clai-group.github.io/MLHO/)

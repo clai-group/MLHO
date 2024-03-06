@@ -65,6 +65,6 @@ knitr::kable(
 ```
 
 
-see the instructions on how to use the MLHO package [on the articles page](https://clai-group.github.io/mlho/articles/) 
+see the instructions on how to use the MLHO package [on the articles page](https://clai-group.github.io/MLHO/) 
 
 
