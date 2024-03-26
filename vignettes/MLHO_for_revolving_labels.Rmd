@@ -1,0 +1,180 @@
+---
+title: "Revolving MSMR with MLHO"
+author: "Jonas Hügel"
+date: "2024-03-25"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+## Load packages
+
+```{r package loading}
+
+##update/install MLHO
+devtools::install_github("clai-group/mlho")
+
+# load MLHO, afterwards source the MSMR.lite.R file to overwrite the MSMR.lite function
+# in the package with the updated one (the encounter functionality is only available in the R file)
+library(mlho)
+
+#load and install required dependecies
+pacman::p_load(data.table, devtools, backports, Hmisc, tidyr,dplyr,ggplot2,plyr,scales,readr,
+                httr, DT, lubridate, tidyverse,reshape2,foreach,doParallel,caret,gbm,lubridate,praznik)
+               
+```
+
+## Prepare the data
+
+```{r data_loading}
+
+dbmart <- mlho::incident_dbmart
+labelDT <- mlho::incident_labeldt
+#TODO sex_colum contains only 1 value, resuling in warnings during training -> change in incident datafile from the package 
+dems <- mlho::incident_dems
+```
+
+##  determine the split for test and train using a 70-30 ratio
+
+```{r train_test_split}
+uniqpats <- c(as.character(unique(dbmart$patient_num)))
+
+
+test_ind <- sample(uniqpats,
+                   round(.3*length(uniqpats)))
+
+```
+
+## transform train data
+```{r transform_train_data}
+
+dat.train  <- subset(dbmart,!(dbmart$patient_num %in% c(test_ind)))
+data.table::setDT(dat.train)
+#values must be in column named value
+dat.train[,value := 1]
+#dat.train$value.var <- 1
+uniqpats.train <- c(as.character(unique(dat.train$patient_num)))
+
+MLHO.dat <- dat.train
+patients <- uniqpats.train
+sparsity=0.05
+jmi=TRUE
+topn=200
+patients <- uniqpats.train
+multicore=FALSE
+encounterLevel=TRUE
+valuesToMerge = TRUE
+dat.train <- mlho::MSMR.lite(dat.train,
+                   labelDT,
+                   binarize=FALSE,
+                   sparsity=0.05,
+                   jmi=TRUE,
+                   topn=200,
+                   patients <- uniqpats.train,
+                   multicore=FALSE,
+                   encounterLevel=TRUE,
+                   valuesToMerge = TRUE)
+
+```
+
+## transform test data
+```{r transforma_test_data} 
+
+dat.test <- subset(dbmart,dbmart$patient_num %in% c(test_ind))
+uniqpats.test <- c(as.character(unique(dat.test$patient_num)))
+# remove phenx not required to create the encounter based phenx 
+# (remove _last, _past and _history from the colnames to determine the phenxs)
+dat.train.colnames <- vapply(strsplit(colnames(dat.train),"_"),`[`, 1, FUN.VALUE=character(1))
+dat.test <- subset(dat.test,dat.test$phenx %in% dat.train.colnames)
+setDT(dat.test)
+#values must be in column named value
+dat.test$value <- 1
+
+# important to have a value and phenx column to merge
+dat.test <- MSMR.lite(MLHO.dat=dat.test,
+                       patients = uniqpats.test,
+                       sparsity=NA,
+                       jmi = FALSE,
+                       labels = labelDT,
+                       encounterLevel = TRUE,
+                       valuesToMerge = TRUE)
+
+# remove sparse and not relevant _past, _last _history phenx according to the train data
+dat.test <- dat.test %>% select(one_of(colnames(dat.train)))
+
+```
+
+## update dems and labelDT
+``` {r update dems and labels}
+
+dems <- dems %>%
+  merge(labelDT,by = "patient_num") %>%
+  mutate(patient_num = paste0(patient_num,"_" ,start_date)) %>%
+  select(-start_date, -label)
+
+# merge patientnum)and encounter date in labelDT
+labeDT <- labelDT %>%
+  mutate(patient_num = paste0(patient_num,"_" ,start_date))  %>%
+  select(-start_date)
+
+```
+
+## train model
+we may want to reduce the output of this cell
+```{r training}
+
+
+model.test <- mlearn(dat.train,
+                     dat.test,
+                     dems=dems,
+                     save.model=FALSE,
+                     classifier="gbm",
+                     note="mlho_terst_run",
+                     cv="cv",
+                     nfold=5,
+                     aoi="random phenx from dbmart",
+                     multicore=FALSE)
+
+```
+
+
+
+
+## visualize results
+Here we create a plot of the feature importance scores for each of the top (here we have `r nrow(model.test$coefficients)`) predictors identified by MLHO.
+
+To do so, let's map the concept codes to their "English" translation. *That's why we kept that 4th column called `description` in `dbmart`.*
+
+
+```{r visualisazation}
+#TODO FIX! copie from original vignette
+
+model.test$features
+
+#TODO fix merge, cut past/last/history before merging the features with the concepts and append afterwards
+dbmart.concepts <- dbmart[!duplicated(paste0(dbmart$phenx)), c("phenx","DESCRIPTION")]
+mlho.features <- data.frame(merge(model.test$features,dbmart.concepts,by.x="features",by.y = "phenx"))
+datatable(dplyr::select(mlho.features,features,DESCRIPTION,`Feature importance`=Overall), options = list(pageLength = 5), filter = 'bottom')
+```
+
+now visualizing feature importance
+```{r visualisazation_fig,fig.align='center',fig.width=7,fig.height=7}
+#TODO FIX
+(plot<- ggplot(mlho.features) +
+    geom_segment(
+      aes(y = 0,
+          x = reorder(DESCRIPTION,Overall),
+          yend = Overall,
+          xend = DESCRIPTION),
+      size=0.5,alpha=0.5) +
+    geom_point(
+      aes(x=reorder(DESCRIPTION,Overall),y=Overall),
+      alpha=0.5,size=2,color="red") +
+    theme_minimal()+
+   coord_flip()+
+    labs(y="Feature importance",x=""))
+```
+
