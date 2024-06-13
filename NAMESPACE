@@ -2,6 +2,7 @@
 
 export(MSMR.lite)
 export(absErr)
+export(benchmark.revolving)
 export(bias)
 export(caliber)
 export(learn)

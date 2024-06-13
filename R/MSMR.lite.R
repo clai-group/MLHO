@@ -10,6 +10,7 @@
 #' @param multicore if you want to parallelize the jmi
 #' @param encounterLevel set to true if you have multiple date assigned labels per patient
 #' @param valuesToMerge set to true if you have a "value" column for phenx and want to unite these columns into one
+#' @param timeBuffer a vector containing three numbers (h,p,l) describing the time buffer that should be added to the dates used to calculate the last, past and history event groups (only used when encounterLevel=TRUE).
 #'
 #' @return
 #' @export
@@ -24,11 +25,16 @@ MSMR.lite <- function(MLHO.dat,
                        patients,
                        multicore=FALSE,
                        encounterLevel=FALSE,
-                       valuesToMerge=FALSE){
+                       valuesToMerge=FALSE,
+                       timeBufffer=c(h=0,p=0,l=0)){
 
   require("dplyr")
   require("DT")
   require('tidyr')
+
+  temp_buffer_history = timeBufffer[1]
+  temp_buffer_past = timeBufffer[2]
+  temp_buffer_last = timeBufffer[3]
 
   if(valuesToMerge){
     MLHO.dat <- MLHO.dat %>%
@@ -60,7 +66,6 @@ MSMR.lite <- function(MLHO.dat,
 
 
   if(encounterLevel){
-
     print("Applying encounter based transformations!")
     MLHO.dat$start_date<-as.Date(MLHO.dat$start_date)
     labels$start_date<-as.Date(labels$start_date)
@@ -76,7 +81,7 @@ MSMR.lite <- function(MLHO.dat,
         dplyr::select(patient_num, start_date)
 
       #summarize all events before the first encounter as history
-      first.encounter <- min(encounters$start_date)
+      first.encounter <- min(encounters$start_date) - temp_buffer_history
       patient_labels <-labels %>%
         dplyr::filter(patient_num == patient)
       history.data <- patient.data %>%
@@ -89,7 +94,7 @@ MSMR.lite <- function(MLHO.dat,
       past.encounter <- NULL
 
       for(i in seq(length(encounters$start_date))){
-        encounter = encounters$start_date[i]
+        encounter = encounters$start_date[i] - temp_buffer_last
         last.encounter <- encounter
         if(is.null(past.encounter)){
           encounter.data <- patient.data %>%
@@ -110,8 +115,8 @@ MSMR.lite <- function(MLHO.dat,
             rbind(encounter.data)
         }
 
-        #set new past encounter
-        past.encounter <- last.encounter
+        #set new past encounter (add temp_buffer last to get back to the original date and the subtract the past buffer)
+        past.encounter <- last.encounter + temp_buffer_last - temp_buffer_past
         #append history, past and last merge patient_num with encounter_date
 
         MLHO.encounter.data$start_date <- as.Date(MLHO.encounter.data$start_date)
