@@ -115,11 +115,14 @@ MSMR.lite <- function(MLHO.dat,
             rbind(encounter.data)
         }
 
+
         #set new past encounter (add temp_buffer last to get back to the original date and the subtract the past buffer)
         past.encounter <- last.encounter + temp_buffer_last - temp_buffer_past
         #append history, past and last merge patient_num with encounter_date
 
         MLHO.encounter.data$start_date <- as.Date(MLHO.encounter.data$start_date)
+        ## add the temp_buffer so that the encounter date matches the label_date
+        encounter<- encounter + temp_buffer_last
         encounter.data$start_date <-as.Date(encounter.data$start_date)
 
         MLHO.encounter.data <- rbind(history.data, encounter.data) %>%
@@ -137,6 +140,15 @@ MSMR.lite <- function(MLHO.dat,
     labels <- labels %>%
       dplyr::mutate(patient_num = paste0(patient_num,"_" ,start_date)) %>%
       dplyr::select(-start_date)
+
+    MLHO.dat.table <- MLHO.encounter.data %>%
+      select(patient_num,phenx) %>%
+      unique() %>%
+      pull(phenx) %>%
+      table()
+
+    MLHO.dat.agg <- data.frame(phenx=names(MLHO.dat.table),distinct_patients=as.vector(MLHO.dat.table))
+
   }else{ #old code
     MLHO.dat.wide <- MLHO.dat %>%
       dplyr::group_by(patient_num,phenx) %>%
