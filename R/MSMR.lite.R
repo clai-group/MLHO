@@ -69,6 +69,9 @@ MSMR.lite <- function(MLHO.dat,
     print("Applying encounter based transformations!")
     MLHO.dat$start_date<-as.Date(MLHO.dat$start_date)
     labels$start_date<-as.Date(labels$start_date)
+    if("o_date" %in% colnames(labels)){
+      labels$start_date<-as.Date(labels$o_date)
+    }
 
     for(patient in patients){
       #get data and labels for current patient
@@ -76,9 +79,15 @@ MSMR.lite <- function(MLHO.dat,
         dplyr::filter(patient_num == patient) %>%
         dplyr::select(everything())
 
+      if("o_date" %in% colnames(labels)){
+        encounters <-labels %>%
+          dplyr::filter(patient_num == patient) %>%
+          dplyr::select(patient_num, start_date,o_date)
+      }else{
       encounters <-labels %>%
         dplyr::filter(patient_num == patient) %>%
         dplyr::select(patient_num, start_date)
+      }
 
       #summarize all events before the first encounter as history
       first.encounter <- min(encounters$start_date) - temp_buffer_history
@@ -96,6 +105,12 @@ MSMR.lite <- function(MLHO.dat,
       for(i in seq(length(encounters$start_date))){
         encounter = encounters$start_date[i] - temp_buffer_last
         last.encounter <- encounter
+        if("o_date" %in% colnames(labels)){
+          time_till_outcome <- as.numeric(encounters$o_date - last.encounter)
+        } else{
+          time_till_outcome <- 0
+        }
+        last.encounter <- last.encounter + time_till_outcome
         if(is.null(past.encounter)){
           encounter.data <- patient.data %>%
             dplyr::filter (start_date >= first.encounter & start_date <= last.encounter) %>%
@@ -116,8 +131,8 @@ MSMR.lite <- function(MLHO.dat,
         }
 
 
-        #set new past encounter (add temp_buffer last to get back to the original date and the subtract the past buffer)
-        past.encounter <- last.encounter + temp_buffer_last - temp_buffer_past
+        #set new past encounter (add temp_buffer last to get back to the original date and the subtract the past buffer and the previously added time_till_outcomr)
+        past.encounter <- last.encounter + temp_buffer_last - temp_buffer_past - time_till_outcome
         #append history, past and last merge patient_num with encounter_date
 
         MLHO.encounter.data$start_date <- as.Date(MLHO.encounter.data$start_date)
