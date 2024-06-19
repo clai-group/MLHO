@@ -106,7 +106,7 @@ MSMR.lite <- function(MLHO.dat,
         encounter = encounters$start_date[i] - temp_buffer_last
         last.encounter <- encounter
         if("o_date" %in% colnames(labels)){
-          time_till_outcome <- as.numeric(encounters$o_date - last.encounter)
+          time_till_outcome <- as.numeric(encounters$o_date[i] - last.encounter)
         } else{
           time_till_outcome <- 0
         }
@@ -154,7 +154,7 @@ MSMR.lite <- function(MLHO.dat,
 
     labels <- labels %>%
       dplyr::mutate(patient_num = paste0(patient_num,"_" ,start_date)) %>%
-      dplyr::select(-start_date)
+      dplyr::select(-start_date,-o_date)
 
     MLHO.dat.table <- MLHO.encounter.data %>%
       select(patient_num,phenx) %>%
