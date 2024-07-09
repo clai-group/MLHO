@@ -28,7 +28,10 @@ mlearn <- function(dat.train,
                    aoi="label",
                    multicore=FALSE,
                    preProc=TRUE,
-                   calSHAP=FALSE)
+                   calSHAP=FALSE,
+                   n_incidence = 25,
+                   counterfactual = FALSE,
+                   save.model.counterfactual = FALSE)
 {
 
   if(multicore==TRUE){
@@ -73,7 +76,8 @@ mlearn <- function(dat.train,
       model <- caret::train(as.formula(paste(goldstandard, "~ .")),
                             data=dat.train
                             , trControl=train_control
-                            , method = classifier)}
+                            , method = classifier)
+      }
 
     if(preProc == TRUE) {preProc=c("center", "scale")
 
@@ -82,6 +86,16 @@ mlearn <- function(dat.train,
                           , trControl=train_control
                           , method = classifier
                           ,preProc)}
+    if(counterfactual == TRUE) {
+      counterfactual_dat = dat.train
+      names(counterfactual_dat) <- make.names(names(counterfactual_dat))
+      preProc=c("center", "scale")
+      model.counterfactual <- caret::train(as.formula(paste(goldstandard, "~ .")),
+                            data=counterfactual_dat
+                            , trControl=train_control
+                            , method = classifier
+                            ,preProc)
+    }
 
 
 
@@ -167,7 +181,7 @@ mlearn <- function(dat.train,
 
       shap_val <- predict_parts(explainer = explain,
                                 new_observation =  dat.test[, !names(dat.test) %in% aoi],
-                                type = "shap")
+                                type = "shap", B = n_incidence)
     }
 
 
@@ -177,7 +191,8 @@ mlearn <- function(dat.train,
       calibrations=cali,
       AE=err,
       missing.features=test.miss,
-      shap = shap_val
+      shap = shap_val,
+      counterfactual = model.counterfactual
     ))
   }
 
@@ -232,10 +247,14 @@ mlearn <- function(dat.train,
       ##save the model
       saveRDS(model, paste0(getwd(),"/results/model_",classifier,"_",note,"_",aoi,".rds"))
     }
+    if(save.model.counterfactual==TRUE){
+      ##save the model
+      saveRDS(model.counterfactual, paste0(getwd(),"/results/model_counterfactual_",classifier,"_",note,"_",aoi,".rds"))
+    }
 
 
     return(
-      features=output
+      features= list(output = output, counterfactual = model.counterfactual)
     )
   }
 }
