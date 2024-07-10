@@ -6,14 +6,12 @@
 #' @param data.shap Model output containing SHAP values from `mlearn`
 #' @param data.descp A table with feature description
 #' @param top_n The number of top features to display.
-#' @param plot_type 'waterfall' or 'force'
-#' @param num The nth of incidence picked
 #' @return
 #' @export
 #'
 #' @examples
 #' # Assuming `shap_value` is your data frame with SHAP values
-#' visualize_shap(shap_value, dbmart.concepts, plot_type = "waterfall", top_n = 5, num = 6)
+#' mshapviz_all(shap_value, dbmart.concepts, top_n = 10)
 
 position_bee <- function(width = NULL, adjust = NULL) {
   ggplot2::ggproto(NULL, PositionBee, width = width, adjust = adjust)
@@ -132,6 +130,7 @@ mshapviz_all <- function(shap_value, dbmart.concepts, top_n = 10) {
     ggplot2::geom_vline(xintercept = 0, color = "darkgray") +
     ggplot2::geom_point(ggplot2::aes(color = contribution),
                         position = position_bee(width = 0.4, adjust = 0.5)) +
+    labs(color = "SHAP value") +
     ggplot2::theme_bw() +
     ggplot2::labs(y = ggplot2::element_blank(), x = "SHAP value") 
   
