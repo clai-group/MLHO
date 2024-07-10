@@ -46,6 +46,12 @@ mlearn(
 \item{preProc}{preprocessig on the train data or not}
 
 \item{calSHAP}{calculating SHAP value or not, the default is false}
+
+\item{n_incidence}{number of incidences picked for calculating SHAP value}
+
+\item{counterfactual}{models for counterfactual analysis}
+
+\item{save.model.counterfactual}{do you want to save the counterfactual model?}
 }
 \description{
 the MLHO ML training and testing

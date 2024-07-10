@@ -12,6 +12,9 @@
 #' @param nfold nfold cross validation folds
 #' @param preProc preprocessig on the train data or not
 #' @param calSHAP calculating SHAP value or not, the default is false
+#' @param n_incidence number of incidences picked for calculating SHAP value
+#' @param counterfactual models for counterfactual analysis
+#' @param save.model.counterfactual do you want to save the counterfactual model?
 #'
 #' @return
 #' @export
