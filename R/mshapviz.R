@@ -14,7 +14,7 @@
 #' @examples
 #' # Assuming `shap_value` is your data frame with SHAP values
 #' visualize_shap(shap_value, dbmart.concepts, plot_type = "waterfall", top_n = 5, num = 6)
-visualize_shap <- function(shap_value, dbmart.concepts, plot_type = "force", top_n = 5, num = 1) {
+mshapviz <- function(shap_value, dbmart.concepts, plot_type = "force", top_n = 5, num = 1) {
   shp1 <- shap_value %>%
     filter(B == num) %>%
     mutate(S = as.numeric(contribution),

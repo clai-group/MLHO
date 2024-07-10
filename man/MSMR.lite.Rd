@@ -5,16 +5,17 @@
 \title{MSMR lite}
 \usage{
 MSMR.lite(
-  MLHO.dat,
-  labels,
+  MLHO.dat = dat.train,
+  labels = test_label,
   binarize = FALSE,
   sparsity = NA,
   jmi = TRUE,
   topn = 200,
-  patients,
+  patients = uniqpats.train,
   multicore = FALSE,
   encounterLevel = FALSE,
-  valuesToMerge = FALSE
+  valuesToMerge = FALSE,
+  timeBufffer = c(h = 0, p = 0, l = 0)
 )
 }
 \arguments{
