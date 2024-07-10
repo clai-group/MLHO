@@ -2,7 +2,7 @@
 % Please edit documentation in R/benchmark_revolving.R
 \name{benchmark.revolving}
 \alias{benchmark.revolving}
-\title{Benchmark for revolving events}
+\title{Benchmark for rolling events with history/past/last timeframes vs one-hot encoding for rolling events (patients with several labels at different timestamps)}
 \usage{
 benchmark.revolving(
   MLHO.dat,
@@ -13,9 +13,8 @@ benchmark.revolving(
   topn = 200,
   patients,
   multicore = FALSE,
-  encounterLevel = FALSE,
   valuesToMerge = FALSE,
-  timeBufffer = c(0, 0, 0)
+  timeBufffer = c(h = 0, p = 0, l = 0)
 )
 }
 \arguments{
@@ -35,12 +34,12 @@ benchmark.revolving(
 
 \item{multicore}{if you want to parallelize the jmi}
 
-\item{encounterLevel}{set to true if you have multiple date assigned labels per patient}
-
 \item{valuesToMerge}{set to true if you have a "value" column for phenx and want to unite these columns into one}
+
+\item{encounterLevel}{set to true if you have multiple date assigned labels per patient}
 
 \item{timeBuffer}{a vector containing three numbers (h,p,l) describing the time buffer that should be added to the dates used to calculate the last, past and history event groups (only used when encounterLevel=TRUE).}
 }
 \description{
-Benchmark for revolving events
+Benchmark for rolling events with history/past/last timeframes vs one-hot encoding for rolling events (patients with several labels at different timestamps)
 }

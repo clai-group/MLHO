@@ -5,13 +5,13 @@
 \title{MSMR lite}
 \usage{
 MSMR.lite(
-  MLHO.dat,
-  labels,
+  MLHO.dat = dat.train,
+  labels = test_label,
   binarize = FALSE,
   sparsity = NA,
   jmi = TRUE,
   topn = 200,
-  patients,
+  patients = uniqpats.train,
   multicore = FALSE,
   encounterLevel = FALSE,
   valuesToMerge = FALSE,
@@ -38,8 +38,6 @@ MSMR.lite(
 \item{encounterLevel}{set to true if you have multiple date assigned labels per patient}
 
 \item{valuesToMerge}{set to true if you have a "value" column for phenx and want to unite these columns into one}
-
-\item{timeBuffer}{a vector containing three numbers (h,p,l) describing the time buffer that should be added to the dates used to calculate the last, past and history event groups (only used when encounterLevel=TRUE).}
 }
 \description{
 MSMR lite

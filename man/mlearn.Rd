@@ -16,7 +16,10 @@ mlearn(
   aoi = "label",
   multicore = FALSE,
   preProc = TRUE,
-  calSHAP = FALSE
+  calSHAP = FALSE,
+  n_incidence = 25,
+  counterfactual = FALSE,
+  save.model.counterfactual = FALSE
 )
 }
 \arguments{

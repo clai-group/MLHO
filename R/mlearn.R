@@ -33,54 +33,54 @@ mlearn <- function(dat.train,
                    counterfactual = FALSE,
                    save.model.counterfactual = FALSE)
 {
-
+  
   if(multicore==TRUE){
     ###setup parallel backend
     cores<-detectCores()
     cl <- makeCluster(cores[1]-2)
     registerDoParallel(cl)}
-
+  
   if (!is.null(dat.test)) {
     if(!is.null(dems)){
       dat.train <- merge(dat.train,dems, by="patient_num")
       dat.test <- merge(dat.test,dems, by="patient_num")
     }
-
-
+    
+    
     #modeling
     print("the modeling!")
     dat.train$label <- ifelse(dat.train$label ==1 , "Y","N")
     dat.test$label <- ifelse(dat.test$label ==1 , "Y","N")
-
+    
     dat.train$label <- as.factor(dat.train$label)
     dat.test$label <- as.factor(dat.test$label)
-
-
+    
+    
     goldstandard <- "label"
     dat.train$patient_num <- NULL
-
+    
     # set.seed(1395)
     Sys.setenv(R_MAX_NUM_DLLS = 999)
-
+    
     options(java.parameters = "-Xmx8048m")
-
+    
     ###starting prediction and testing
     train_control <- caret::trainControl(method=cv, number=nfold,#method="boot", number=nrow(dat.test),
                                          summaryFunction = twoClassSummary,
                                          classProbs = T,
                                          savePredictions = T)
-
-
+    
+    
     if(preProc == FALSE) {
-
+      
       model <- caret::train(as.formula(paste(goldstandard, "~ .")),
                             data=dat.train
                             , trControl=train_control
                             , method = classifier)
-      }
-
+    }
+    
     if(preProc == TRUE) {preProc=c("center", "scale")
-
+    
     model <- caret::train(as.formula(paste(goldstandard, "~ .")),
                           data=dat.train
                           , trControl=train_control
@@ -91,25 +91,25 @@ mlearn <- function(dat.train,
       names(counterfactual_dat) <- make.names(names(counterfactual_dat))
       preProc=c("center", "scale")
       model.counterfactual <- caret::train(as.formula(paste(goldstandard, "~ .")),
-                            data=counterfactual_dat
-                            , trControl=train_control
-                            , method = classifier
-                            ,preProc)
+                                           data=counterfactual_dat
+                                           , trControl=train_control
+                                           , method = classifier
+                                           ,preProc)
     }
-
-
-
+    
+    
+    
     test_feats <- c(as.character(names(dat.test)))
     test.miss <- setdiff(names(dat.train),names(dat.test))
     dat.test[test.miss] <- 0
-
-
+    
+    
     ROC <- metrix(datval = dat.test,model=model,label.col = which( colnames(dat.test)=="label" ),note=note,
                   phenx = aoi,topn = ncol(dat.train)-1)
     ROC$cv_roc <- mean(model$results$ROC)
     ROC$cv_roc_sd <- mean(model$results$ROCSD)
     ROC$classifier <- classifier
-
+    
     if(classifier=="glmboost"){
       ##coefficients
       coefficients <- data.frame(unlist(coef(model$finalModel, model$bestTune$lambda)))
@@ -138,7 +138,7 @@ mlearn <- function(dat.train,
         coefficients$classifier <- classifier
         coefficients$aoi <- aoi
       }
-
+      
       if(classifier!="regLogistic"){
         coefficients <- data.frame(varImp(model,scale = TRUE)$importance)
         coefficients$features <- as.character(rownames(coefficients))
@@ -150,81 +150,95 @@ mlearn <- function(dat.train,
         coefficients$aoi <- aoi
       }
     }
-
-
-
-
+    
+    
+    
+    
     test.miss <- setdiff(coefficients$features,test_feats)
-
+    
     ###calibration
     cali <- caliber(datval = dat.test,model=model,label.col = which( colnames(dat.test)=="label" ))
     cali$classifier <- classifier
     cali$phenx <- aoi
-
+    
     ##error
     err <- absErr(datval = dat.test,model=model,label.col = which( colnames(dat.test)=="label" ))
     err$classifier <- classifier
     err$phenx <- aoi
-
-
+    
+    
     if(save.model==TRUE){
       ##save the model
       saveRDS(model, paste0(getwd(),"/results/model_",classifier,"_",note,"_",aoi,".rds"))
     }
-
+    
     shap_val <- data.frame()
     if(calSHAP ==TRUE){
       explain <- DALEX::explain(model,
                                 data = dat.train,
                                 y = as.numeric(dat.train[[aoi]]),
                                 label = classifier)
-
+      
       shap_val <- predict_parts(explainer = explain,
                                 new_observation =  dat.test[, !names(dat.test) %in% aoi],
                                 type = "shap", B = n_incidence)
     }
-
-
-    return(list(
-      ROC=ROC,
-      features=coefficients,
-      calibrations=cali,
-      AE=err,
-      missing.features=test.miss,
-      shap = shap_val,
-      counterfactual = model.counterfactual
-    ))
+    
+    
+    # return(list(
+    #   ROC=ROC,
+    #   features=coefficients,
+    #   calibrations=cali,
+    #   AE=err,
+    #   missing.features=test.miss,
+    #   shap = shap_val,
+    #   counterfactual = model.counterfactual
+    # ))
+    return_list <- list(
+      ROC = ROC,
+      features = coefficients,
+      calibrations = cali,
+      AE = err,
+      missing.features = test.miss,
+      shap = shap_val
+    )
+    
+    if (counterfactual) {
+      return_list$counterfactual <- model.counterfactual
+    }
+    
+    return(return_list)
   }
-
-
+  
+  
   if (is.null(dat.test)) {
     if(!is.null(dems)){
       dat.train <- merge(dat.train,dems, by="patient_num")
     }
-
-
+    
+    
     #modeling
     print("the modeling!")
     dat.train$label <- ifelse(dat.train$label ==1 , "Y","N")
-
+    
     dat.train$label <- as.factor(dat.train$label)
-
-
+    
+    
     goldstandard <- "label"
     dat.train$patient_num <- NULL
-
+    
     # set.seed(1395)
     Sys.setenv(R_MAX_NUM_DLLS = 999)
-
+    
     options(java.parameters = "-Xmx8048m")
-
+    
     logitMod <- glm(as.formula(paste(goldstandard, "~ .")),
                     data=dat.train, family=binomial(link="logit"))
-
-
+    
+    
     summary(logitMod)
     # car::vif(logitMod)##multicolinearity is fine if vif values are below 4
-
+    
     # logitMod$coefficients
     lreg.or <-exp(cbind(OR = coef(logitMod), confint(logitMod))) ##CIs using profiled log-likelihood
     output <- data.frame(round(lreg.or, digits=4))
@@ -242,7 +256,7 @@ mlearn <- function(dat.train,
     colnames(output) <- c("features","OR","low","high","P")
     output$classifier <- "GLM"
     output$aoi <- aoi
-
+    
     if(save.model==TRUE){
       ##save the model
       saveRDS(model, paste0(getwd(),"/results/model_",classifier,"_",note,"_",aoi,".rds"))
@@ -251,10 +265,17 @@ mlearn <- function(dat.train,
       ##save the model
       saveRDS(model.counterfactual, paste0(getwd(),"/results/model_counterfactual_",classifier,"_",note,"_",aoi,".rds"))
     }
-
-
-    return(
-      features= list(output = output, counterfactual = model.counterfactual)
-    )
+    
+    
+    # return(
+    #   features= list(output = output, counterfactual = model.counterfactual)
+    # )
+    features_list <- list(output = output)
+    
+    if (counterfactual) {
+      features_list$counterfactual <- model.counterfactual
+    }
+    
+    return(list(features = features_list))
   }
 }
