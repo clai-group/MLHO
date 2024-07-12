@@ -3,8 +3,8 @@
 #' This function takes the output from the `mlearn` function and creates either waterfall plot or force plot
 #' showing the top n SHAP values for the specified number of features.
 #'
-#' @param data.shap Model output containing SHAP values from `mlearn`
-#' @param data.descp A table with feature description
+#' @param shap_value SHAP values from `mlearn`
+#' @param dbmart.concepts A table with feature description
 #' @param top_n The number of top features to display.
 #' @return
 #' @export
