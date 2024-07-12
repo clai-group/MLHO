@@ -1,7 +1,5 @@
 #' SHAP values visualization
 #'
-#' This function takes the output from the `mlearn` function and creates either waterfall plot or force plot
-#' showing the top n SHAP values for the specified number of features.
 #'
 #' @param shap_value SHAP values from `mlearn`
 #' @param dbmart.concepts A table with feature description
@@ -12,6 +10,51 @@
 #' @examples
 #' # Assuming `shap_value` is your data frame with SHAP values
 #' mshapviz_all(shap_value, dbmart.concepts, top_n = 10)
+
+mshapviz_all <- function(shap_value, dbmart.concepts, top_n = 10) {
+  top_feature_neg = shap_value %>%
+    filter(sign == -1) %>%
+    group_by(variable) %>%
+    dplyr::summarise(mean_S = mean(contribution)) %>%
+    arrange(desc(mean_S)) %>%
+    top_n(top_n) %>%
+    dplyr::mutate(
+      from = cumsum(lag(mean_S, default = 0)),
+      to = cumsum(mean_S),
+      label = variable) %>% data.frame()
+  
+  top_feature_pos = shap_value %>%
+    filter(sign == 1) %>%
+    group_by(variable) %>%
+    dplyr::summarise(mean_S = mean(contribution)) %>%
+    arrange(desc(mean_S)) %>%
+    top_n(top_n)  %>%
+    dplyr::mutate(
+      from = cumsum(lag(mean_S, default = 0)),
+      to = cumsum(mean_S),
+      label = variable) %>% data.frame()
+  
+  shap.feature <- rbind(top_feature_neg, top_feature_pos)
+  shp <- shap_value[shap_value$variable %in% shap.feature$variable,]
+  
+  shap.dat = merge(shp, shap.feature, by = "variable")
+  
+  dbmart.concepts$phenx = as.character(dbmart.concepts$phenx)
+  shap.dat <- merge(shap.dat, dbmart.concepts, by.x = "variable_name", by.y = "phenx")
+  
+  
+  plot = ggplot2::ggplot(shap.dat, 
+                         ggplot2::aes(x = contribution, y = variable_name)) +
+    #ggplot2::geom_bar(ggplot2::aes(x =contribution/200, y = variable_name),stat = "identity")+
+    ggplot2::geom_vline(xintercept = 0, color = "darkgray") +
+    ggplot2::geom_point(ggplot2::aes(color = contribution),
+                        position = position_bee(width = 0.4, adjust = 0.5)) +
+    labs(color = "SHAP value") +
+    ggplot2::theme_bw() +
+    ggplot2::labs(y = ggplot2::element_blank(), x = "SHAP value") 
+  
+  print(plot)
+}
 
 position_bee <- function(width = NULL, adjust = NULL) {
   ggplot2::ggproto(NULL, PositionBee, width = width, adjust = adjust)
@@ -90,51 +133,6 @@ halton <- function(i, b = 2) {
     viridis_args_plus <- list(guide = "none")
   }
   return(do.call(ggplot2::scale_color_viridis_c, c(viridis_args, viridis_args_plus)))
-}
-
-mshapviz_all <- function(shap_value, dbmart.concepts, top_n = 10) {
-  top_feature_neg = shap_value %>%
-    filter(sign == -1) %>%
-    group_by(variable) %>%
-    dplyr::summarise(mean_S = mean(contribution)) %>%
-    arrange(desc(mean_S)) %>%
-    top_n(top_n) %>%
-    dplyr::mutate(
-      from = cumsum(lag(mean_S, default = 0)),
-      to = cumsum(mean_S),
-      label = variable) %>% data.frame()
-  
-  top_feature_pos = shap_value %>%
-    filter(sign == 1) %>%
-    group_by(variable) %>%
-    dplyr::summarise(mean_S = mean(contribution)) %>%
-    arrange(desc(mean_S)) %>%
-    top_n(top_n)  %>%
-    dplyr::mutate(
-      from = cumsum(lag(mean_S, default = 0)),
-      to = cumsum(mean_S),
-      label = variable) %>% data.frame()
-  
-  shap.feature <- rbind(top_feature_neg, top_feature_pos)
-  shp <- shap_value[shap_value$variable %in% shap.feature$variable,]
-  
-  shap.dat = merge(shp, shap.feature, by = "variable")
-  
-  dbmart.concepts$phenx = as.character(dbmart.concepts$phenx)
-  shap.dat <- merge(shap.dat, dbmart.concepts, by.x = "variable_name", by.y = "phenx")
-  
-  
-  plot = ggplot2::ggplot(shap.dat, 
-                         ggplot2::aes(x = contribution, y = variable_name)) +
-    #ggplot2::geom_bar(ggplot2::aes(x =contribution/200, y = variable_name),stat = "identity")+
-    ggplot2::geom_vline(xintercept = 0, color = "darkgray") +
-    ggplot2::geom_point(ggplot2::aes(color = contribution),
-                        position = position_bee(width = 0.4, adjust = 0.5)) +
-    labs(color = "SHAP value") +
-    ggplot2::theme_bw() +
-    ggplot2::labs(y = ggplot2::element_blank(), x = "SHAP value") 
-  
-  print(plot)
 }
 
 
