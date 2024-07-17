@@ -44,7 +44,7 @@ mshapviz_all <- function(shap_value, dbmart.concepts, top_n = 10) {
   
   
   plot = ggplot2::ggplot(shap.dat, 
-                         ggplot2::aes(x = contribution, y = variable_name)) +
+                         ggplot2::aes(x = contribution, y = DESCRIPTION)) +
     #ggplot2::geom_bar(ggplot2::aes(x =contribution/200, y = variable_name),stat = "identity")+
     ggplot2::geom_vline(xintercept = 0, color = "darkgray") +
     ggplot2::geom_point(ggplot2::aes(color = contribution),
