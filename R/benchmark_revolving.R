@@ -25,7 +25,7 @@ benchmark.revolving <- function(MLHO.dat,
                       patients,
                       multicore=FALSE,
                       valuesToMerge=FALSE,
-                      timeBufffer=c(h=0,p=0,l=0)){
+                      timeBufffer=c(h=0,p=0,l=0,o=0)){
 
   require("dplyr")
   require("DT")
@@ -34,7 +34,7 @@ benchmark.revolving <- function(MLHO.dat,
 
   labels <- subset(labels, labels$patient_num %in% unique(MLHO.dat$patient_num))
   dbmart.atemporal <- foreach(i=1:nrow(labels), .combine=rbind) %do% {
-    MLHO.dat %>% dplyr::filter(start_date <= labels[i,]$start_date - timeBufffer[3] & patient_num == labels[i,]$patient_num) %>%
+    MLHO.dat %>% dplyr::filter(start_date <= labels[i,]$o_date - timeBufffer[4] & patient_num == labels[i,]$patient_num) %>%
       dplyr::mutate(patient_num=paste(patient_num,labels[i,]$start_date,sep='_'))
   }
   labels_atemporal <- labels %>% dplyr::mutate(patient_num=paste(patient_num,start_date,sep='_')) %>% dplyr::select(-start_date)
