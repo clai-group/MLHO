@@ -32,10 +32,11 @@ benchmark.revolving <- function(MLHO.dat,
   require('tidyr')
   require('foreach')
 
-  if("o_date" %in% names(MLHO.dat)) {
+  if("o_date" %in% names(labels)) {
     # Replace start_date with o_date where it exists
-    MLHO.dat <- MLHO.dat %>%
-      mutate(start_date = coalesce(o_date, start_date))
+    labels <- labels %>%
+      mutate(start_date = coalesce(o_date, start_date)) %>%
+      select(-o_date)
   }
   
   labels <- subset(labels, labels$patient_num %in% unique(MLHO.dat$patient_num))
