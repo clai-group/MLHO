@@ -25,7 +25,7 @@ MSMR.lite <- function(MLHO.dat = dat.train,
                       multicore=FALSE,
                       encounterLevel=FALSE,
                       valuesToMerge=FALSE,
-                      timeBufffer=c(h=0,p=0,l=0)){
+                      timeBufffer=c(h=0,p=0,l=0,o=0)){
   
   require("dplyr")
   require("DT")
@@ -34,6 +34,7 @@ MSMR.lite <- function(MLHO.dat = dat.train,
   temp_buffer_history = timeBufffer[1]
   temp_buffer_past = timeBufffer[2]
   temp_buffer_last = timeBufffer[3]
+  temp_buffer_outcome = timeBufffer[4]
   
   if(valuesToMerge){
     MLHO.dat <- MLHO.dat %>%
@@ -105,7 +106,7 @@ MSMR.lite <- function(MLHO.dat = dat.train,
         encounter = encounters$start_date[i] + temp_buffer_last
         last.encounter <- encounter
         if("o_date" %in% colnames(labels)){
-          time_till_outcome <- as.numeric(as.Date(encounters$o_date[i]) - as.Date(last.encounter))
+          time_till_outcome <- as.numeric(as.Date(encounters$o_date[i]) - as.Date(last.encounter)) + temp_buffer_outcome
         } else{
           time_till_outcome <- 0
         }
@@ -131,7 +132,7 @@ MSMR.lite <- function(MLHO.dat = dat.train,
         
         
         #set new past encounter (add temp_buffer last to get back to the original date and the subtract the past buffer and the previously added time_till_outcomr)
-        past.encounter <- last.encounter - temp_buffer_last + temp_buffer_past + time_till_outcome
+        past.encounter <- last.encounter - temp_buffer_last + temp_buffer_past - time_till_outcome
         #append history, past and last merge patient_num with encounter_date
         
         MLHO.encounter.data$start_date <- as.Date(MLHO.encounter.data$start_date)
