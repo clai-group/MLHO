@@ -14,7 +14,7 @@ benchmark.revolving(
   patients,
   multicore = FALSE,
   valuesToMerge = FALSE,
-  timeBufffer = c(h = 0, p = 0, l = 0)
+  timeBufffer = c(h = 0, p = 0, l = 0, o = 0)
 )
 }
 \arguments{
