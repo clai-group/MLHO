@@ -45,8 +45,8 @@ benchmark.revolving <- function(MLHO.dat,
       dplyr::mutate(patient_num=paste(patient_num,labels[i,]$start_date,sep='_'))
   }
   labels_atemporal <- labels %>% dplyr::mutate(patient_num=paste(patient_num,start_date,sep='_')) %>% dplyr::select(-start_date)
-
-
+  
+  
 
   dbmart.atemporal.wide <- MSMR.lite(dbmart.atemporal, labels_atemporal, binarize, sparsity, jmi, topn, unique(dbmart.atemporal$patient_num), multicore, encounterLevel=FALSE, valuesToMerge, timeBufffer)
 
