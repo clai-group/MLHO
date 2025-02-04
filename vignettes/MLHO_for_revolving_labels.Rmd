@@ -42,14 +42,29 @@ We load several datasets from the MLHO package, including incident data and demo
 dbmart <- mlho::incident_dbmart
 labelDT <- mlho::incident_labeldt
 labelDT <- labelDT %>% mutate(o_date=case_when(label == 0 ~ start_date, label == 1 ~ start_date+sample(1:40,1)))
+labelDT$start_date= as.Date(labelDT$start_date)
 #TODO sex_colum contains only 1 value, resuling in warnings during training -> change in incident datafile from the package 
 dems <- mlho::incident_dems
+```
+
+For multiple exposures/treatments, we want to create the unique identifier for patients with different `start_date`. (Make sure the `start_date` in `labelDT` is the same as the start_date in `dbmart` when creating the unique identifier.)
+```{r}
+labelDT = labelDT %>%
+  mutate(patient_num2 = patient_num,
+         patient_num = paste0(patient_num, as.Date(start_date))) %>%
+  distinct()
+
+dbmart = dbmart %>%
+  mutate(patient_num2 = patient_num,
+         patient_num = paste0(patient_num, as.Date(start_date))) %>%
+  distinct()
 ```
 
 ```{r}
 head(dbmart)
 head(labelDT)
 ```
+
 
 ## Splitting data into training and testing sets using a 70-30 ratio
 
@@ -90,25 +105,25 @@ MLHO.dat <- dat.train
 labels = labelDT
 patients <- uniqpats.train
 binarize=FALSE
-sparsity=0.05
+sparsity=0.05 ## Sample size * sparsity. Don't pick a too small value to avoid overfitting
 jmi=TRUE
-topn=200
+topn=50
 patients <- uniqpats.train
-multicore=FALSE
-encounterLevel=TRUE
-valuesToMerge = TRUE
-timeBufffer=c(h=-30,p=-30,l=-30)
-dat.train <- MSMR.lite(dat.train,
-                   labelDT,
+multicore=T
+encounterLevel=F
+valuesToMerge = F
+timeBufffer=c(h=0,p=0,l=0,o=-14)
+dat.train <- MSMR.lite(MLHO.dat,
+                   labels,
                    binarize=FALSE,
-                   sparsity=0.05,
-                   jmi=TRUE,
-                   topn=100,
+                   sparsity,
+                   jmi,
+                   topn,
                    patients <- uniqpats.train,
                    multicore=FALSE,
                    encounterLevel=TRUE,
                    valuesToMerge = TRUE,
-                   timeBufffer=c(h=-30,p=-30,l=-30))
+                   timeBufffer)
 
 ```
 
@@ -127,6 +142,8 @@ setDT(dat.test)
 #values must be in column named value
 dat.test$value <- 1
 
+MLHO.dat.test = dat.test
+
 # important to have a value and phenx column to merge
 dat.test <- MSMR.lite(MLHO.dat=dat.test,
                       patients = uniqpats.test,
@@ -135,13 +152,42 @@ dat.test <- MSMR.lite(MLHO.dat=dat.test,
                       labels = labelDT,
                       encounterLevel = TRUE,
                       valuesToMerge = TRUE,
-                      timeBufffer=c(h=-30,p=-30,l=-30))
-
+                      binarize = F,
+                      timeBufffer)
 
 # remove sparse and not relevant _past, _last _history phenx according to the train data
 dat.test <- dat.test %>% select(one_of(colnames(dat.train)))
 
 ```
+
+## Benchmark
+
+We repeat the data processing and format transformation steps for benchmark, which does not take consideration of temporal labelling.
+
+```{r}
+dat.train.benchmark <- benchmark.revolving(MLHO.dat,
+                   labels,
+                  binarize=FALSE,
+                  sparsity= 0.001,
+                  jmi,
+                  topn ,
+                  patients,
+                  multicore=TRUE,
+                  valuesToMerge=FALSE,
+                  timeBufffer)
+
+dat.test.benchmark <- benchmark.revolving(MLHO.dat.test,
+                                uniqpats.test,
+                                sparsity=NA,
+                                jmi = FALSE,
+                                binarize = F,
+                                labels = labelDT,
+                                timeBufffer)
+
+dat.test.benchmark <- dat.test.benchmark %>% select(one_of(colnames(dat.train.benchmark)))
+
+```
+
 
 ## Update demographics and labels Data
 
@@ -157,7 +203,7 @@ dems <- dems %>%
 Similarly, `labelDT` is updated to concatenate "patient_num" with "start_date" to create a unique identifier for each patient's encounter, which simplifies subsequent merging and data handling processes. The "start_date" column is then removed to clean up the dataset:
 
 ```{r update dems and labels}
-# merge patientnum)and encounter date in labelDT
+# merge patientnum and encounter date in labelDT
 labelDT <- labelDT %>%
   mutate(patient_num = paste0(patient_num,"_" ,start_date))  %>%
   select(-start_date)
@@ -175,7 +221,7 @@ model.test <- mlearn(dat.train,
                      dems=NULL,
                      save.model=FALSE,
                      classifier="gbm",
-                     note="mlho_terst_run",
+                     note="mlho_test_run",
                      cv="cv",
                      nfold=5,
                      aoi="random phenx from dbmart",
@@ -185,6 +231,24 @@ model.test <- mlearn(dat.train,
                      save.model.counterfactual = F)
 
 ```
+
+```{r}
+## model.test for benchmark
+model.test.atemporal <- mlearn(dat.train.benchmark,
+                     dat.test.benchmark,
+                     dems=NULL,
+                     save.model=FALSE,
+                     classifier="gbm",
+                     note="mlho_test_run",
+                     cv="cv",
+                     nfold=5,
+                     aoi="random phenx from dbmart",
+                     multicore=FALSE,
+                     calSHAP = T,
+                     counterfactual = T,
+                     save.model.counterfactual = F)
+```
+
 
 ## Visualize results
 
