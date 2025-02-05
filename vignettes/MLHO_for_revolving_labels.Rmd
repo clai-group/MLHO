@@ -47,19 +47,6 @@ labelDT$start_date= as.Date(labelDT$start_date)
 dems <- mlho::incident_dems
 ```
 
-For multiple exposures/treatments, we want to create the unique identifier for patients with different `start_date`. (Make sure the `start_date` in `labelDT` is the same as the start_date in `dbmart` when creating the unique identifier.)
-```{r}
-labelDT = labelDT %>%
-  mutate(patient_num2 = patient_num,
-         patient_num = paste0(patient_num, as.Date(start_date))) %>%
-  distinct()
-
-dbmart = dbmart %>%
-  mutate(patient_num2 = patient_num,
-         patient_num = paste0(patient_num, as.Date(start_date))) %>%
-  distinct()
-```
-
 ```{r}
 head(dbmart)
 head(labelDT)
@@ -104,18 +91,18 @@ Once the data is labeled, all labels (history, past, last) are merged and reform
 MLHO.dat <- dat.train
 labels = labelDT
 patients <- uniqpats.train
-binarize=FALSE
+binarize=T
 sparsity=0.05 ## Sample size * sparsity. Don't pick a too small value to avoid overfitting
 jmi=TRUE
 topn=50
 patients <- uniqpats.train
 multicore=T
-encounterLevel=F
+encounterLevel=T
 valuesToMerge = F
-timeBufffer=c(h=0,p=0,l=0,o=-14)
+timeBufffer=c(h=0,p=0,l=0,o=-30)
 dat.train <- MSMR.lite(MLHO.dat,
                    labels,
-                   binarize=FALSE,
+                   binarize,
                    sparsity,
                    jmi,
                    topn,
