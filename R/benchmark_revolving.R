@@ -34,7 +34,11 @@ benchmark.revolving <- function(MLHO.dat,
 
   if("o_date" %in% names(labels)) {
     # Replace start_date with o_date where it exists
-    labels <- labels %>%
+    labels = labels %>%
+      dplyr::mutate(o_date = case_when(
+        o_date + timeBufffer[4] <= start_date ~ start_date,
+        TRUE ~ o_date
+      )) %>%
       mutate(start_date = coalesce(o_date, start_date)) %>%
       select(-o_date)
   }

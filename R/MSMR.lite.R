@@ -70,6 +70,11 @@ MSMR.lite <- function(MLHO.dat = dat.train,
     MLHO.dat$start_date<-as.Date(MLHO.dat$start_date)
     labels$start_date<-as.Date(labels$start_date)
     if("o_date" %in% colnames(labels)){
+      labels = labels %>%
+        dplyr::mutate(o_date = case_when(
+          o_date + temp_buffer_outcome <= start_date ~ start_date,
+          TRUE ~ o_date
+          ))
       labels$o_date<-as.Date(labels$o_date)
     }
     
