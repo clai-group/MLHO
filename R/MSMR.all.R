@@ -32,29 +32,28 @@ MSMR.all <- function(MLHO.dat = dat.train,
                       timeBufffer=c(h=0,p=0,l=0,o=0)){
   if (multiExposure ==T){
     if (benchmark==T){
-      dbmart.wide = MSMR.me(MLHO.dat, 
+      dbmart.wide = benchmark.revolving(MLHO.dat, 
                                       labels, 
                                       binarize, 
                                       sparsity, 
                                       jmi, 
                                       topn, 
                                       uniqpats.train, 
-                                      multicore, 
-                                      encounterLevel=FALSE, 
+                                      multicore,  
                                       valuesToMerge, 
                                       timeBufffer)
     }else{
-      dbmart.wide <- benchmark.revolving(MLHO.dat, 
-                                            labels, 
-                                            binarize, 
-                                            sparsity, 
-                                            jmi, 
-                                            topn, 
-                                            uniqpats.train, 
-                                            multicore, 
-                                            encounterLevel=FALSE, 
-                                            valuesToMerge, 
-                                            timeBufffer)
+      dbmart.wide <- MSMR.me(MLHO.dat, 
+                            labels, 
+                            binarize, 
+                            sparsity, 
+                            jmi, 
+                            topn, 
+                            uniqpats.train, 
+                            multicore, 
+                            encounterLevel=T, 
+                            valuesToMerge, 
+                            timeBufffer)
     }
   }else{
     dbmart.wide <- MSMR.lite(MLHO.dat, 
