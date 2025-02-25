@@ -16,16 +16,16 @@
 #'
 
 MSMR.me <- function(MLHO.dat = dat.train,
-                      labels = test_label,
-                      binarize=FALSE,
-                      sparsity=NA,
-                      jmi=TRUE,
-                      topn=200,
-                      patients = uniqpats.train,
-                      multicore=FALSE,
-                      encounterLevel=FALSE,
-                      valuesToMerge=FALSE,
-                      timeBufffer=c(h=0,p=0,l=0,o=0)){
+                    labels = test_label,
+                    binarize=FALSE,
+                    sparsity=NA,
+                    jmi=TRUE,
+                    topn=200,
+                    patients = uniqpats.train,
+                    multicore=FALSE,
+                    encounterLevel=FALSE,
+                    valuesToMerge=FALSE,
+                    timeBufffer=c(h=0,p=0,l=0,o=0)){
   
   require("dplyr")
   require("DT")
@@ -74,7 +74,7 @@ MSMR.me <- function(MLHO.dat = dat.train,
         dplyr::mutate(o_date = case_when(
           o_date + temp_buffer_outcome <= start_date ~ start_date,
           TRUE ~ o_date
-          ))
+        ))
       labels$o_date<-as.Date(labels$o_date)
     }
     
@@ -116,23 +116,35 @@ MSMR.me <- function(MLHO.dat = dat.train,
           time_till_outcome <- 0
         }
         last.encounter <- last.encounter + time_till_outcome
-        if(is.null(past.encounter)){
+        if(!encounters$o_date[i] == encounters$start_date[i]) {
           encounter.data <- patient.data %>%
-            dplyr::filter (start_date >= first.encounter & start_date <= last.encounter) %>%
+            dplyr::filter (start_date > encounters$start_date[i]  & start_date <= last.encounter) %>%
             dplyr::select(patient_num, phenx, start_date) %>%
             dplyr::mutate(phenx = paste0(phenx,'_last', sep=""))
-        } else{
           encounter.data <- patient.data %>%
-            dplyr::filter (start_date > past.encounter & start_date <= last.encounter) %>%
-            dplyr::select(patient_num, phenx, start_date) %>%
-            dplyr::mutate(phenx = paste0(phenx,'_last', sep=""))
-        }
-        if(!is.null(past.encounter)){
-          encounter.data <- patient.data %>%
-            dplyr::filter (start_date <= past.encounter & start_date>=first.encounter) %>%
+            dplyr::filter (start_date <= encounters$start_date[i]+ temp_buffer_last & start_date>=first.encounter - temp_buffer_history) %>%
             dplyr::select(patient_num, phenx, start_date) %>%
             dplyr::mutate(phenx = paste0(phenx,'_past', sep="")) %>%
             rbind(encounter.data)
+        } else{
+          if(is.null(past.encounter)){
+            encounter.data <- patient.data %>%
+              dplyr::filter (start_date >= first.encounter - temp_buffer_history & start_date <= last.encounter) %>%
+              dplyr::select(patient_num, phenx, start_date) %>%
+              dplyr::mutate(phenx = paste0(phenx,'_last', sep=""))
+          } else{
+            encounter.data <- patient.data %>%
+              dplyr::filter (start_date > past.encounter -temp_buffer_past & start_date <= last.encounter) %>%
+              dplyr::select(patient_num, phenx, start_date) %>%
+              dplyr::mutate(phenx = paste0(phenx,'_last', sep=""))
+          }
+          if(!is.null(past.encounter)){
+            encounter.data <- patient.data %>%
+              dplyr::filter (start_date <= past.encounter & start_date>=first.encounter- temp_buffer_history) %>%
+              dplyr::select(patient_num, phenx, start_date) %>%
+              dplyr::mutate(phenx = paste0(phenx,'_past', sep="")) %>%
+              rbind(encounter.data)
+          }
         }
         
         
@@ -209,24 +221,35 @@ MSMR.me <- function(MLHO.dat = dat.train,
     
     
     topfeatures.AVR <- subset(JMIs.AVR,JMIs.AVR$rank <= topn)
-    topfeatures.AVR <- c(as.character(unique(topfeatures.AVR$phenx)))
-    AVR <- AVR[, names(AVR) %in% topfeatures.AVR | names(AVR) %in% names(labels)]
+    topfeatures.AVR.phenx <- c(as.character(unique(topfeatures.AVR$phenx)))
+    AVR <- AVR[, names(AVR) %in% topfeatures.AVR.phenx | names(AVR) %in% names(labels)]
+    #binarize?
+    if(binarize==TRUE){
+      AVR[,2:dim(AVR)[2]] <- +(AVR[,2:dim(AVR)[2]] > 0)
+    }
+    AVR <- as.data.frame(AVR)
+    out <- list()
+    out$AVR <- AVR
+    out$rank<- topfeatures.AVR
     
+    if(multicore==TRUE){
+      stopCluster(cl)
+    }
+    
+    return(out)
   }
   
   if (jmi==FALSE){
     # AVR <- merge(AVR,labels,by="patient_num")
     AVR <- dplyr::left_join(AVR,labels,by="patient_num")
+    #binarize?
+    if(binarize==TRUE){
+      AVR[,2:dim(AVR)[2]] <- +(AVR[,2:dim(AVR)[2]] > 0)
+    }
+    AVR <- as.data.frame(AVR)
+    return(AVR)
   }
   
-  #binarize?
-  if(binarize==TRUE){
-    AVR[,2:dim(AVR)[2]] <- +(AVR[,2:dim(AVR)[2]] > 0)
-  }
-  
-  AVR <- as.data.frame(AVR)
-  
-  return(AVR)
   
 }
 
