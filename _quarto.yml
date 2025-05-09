@@ -1,9 +1,6 @@
 project:
   type: website
-  output-dir: docs
-  files:
-  - index.qmd
-  - Articles/*.qmd
+  output-dir: .
 
 website:
   title: "MLHO"
