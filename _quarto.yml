@@ -1,6 +1,7 @@
 project:
   type: website
   output-dir: .
+  site-url: https://clai-group.github.io/MLHO
 
 website:
   title: "MLHO"
