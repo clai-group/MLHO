@@ -1,12 +1,7 @@
 ---
 title: "MLHO Vanilla"
-author: Hossein Estiri, Jiazi Tian, Jingya
-date: Mar. 5th 2024
-output: rmarkdown::html_vignette
-vignette: >
-  %\VignetteIndexEntry{MLHO Vanilla}
-  %\VignetteEngine{knitr::rmarkdown}
-  %\VignetteEncoding{UTF-8}
+format: html
+editor: visual
 ---
 
 ```{r, include = FALSE}
@@ -136,7 +131,8 @@ outputs of `mlearn` include:
 For instance, only the following `r nrow(model.test$features)` features were used in phenotyping the `prediabetes`:
 
 ```{r}
-model.test$features
+features = model.test$features
+head(features)
 ```
 
 *we recommend iterating the training and testing and storing the coefficients in a directory.*
@@ -183,14 +179,10 @@ head(as.data.frame(shap_value))
 Using the default plot function, the feature importance are shown below.
 
 ```{r}
-# shap_value <- data.frame(merge(shap_value,dbmart.concepts,by.x="variable_name",by.y = "phenx"))
-# shap_value <- shap_value %>% select(-variable)
-# names(shap_value)[names(shap_value) == 'DESCRIPTION'] <- 'variable'
 plot(shap_value)
 mshapviz(shap_value, dbmart.concepts, plot_type = "waterfall", top_n = 5, num = 6)
-mshapviz_all(shap_value, dbmart.concepts, top_n = 10)
+mshapviz_all(shap_value, dbmart.concepts, top_n = 5)
 ```
-
 
 
 ## Notes for more complex implementation
@@ -198,3 +190,4 @@ mshapviz_all(shap_value, dbmart.concepts, top_n = 10)
 As we recommended above, it's best to at least iterate the training process 5 times, in which case you'll have 5 files containing the important features from MLHO. We do this regularly. If you do so, you can compute the mean/median values for each feature.
 
 Now if you want to get the regression coefficients and compute Odds Ratios (ORs), you can then select the top feature that were selected most frequently in MLHO iterations to run a regression model (pass `glm` to `mlearn`) and extract regression coefficients to then transform to ORs.
+

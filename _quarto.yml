@@ -1,0 +1,26 @@
+project:
+  type: website
+  output-dir: .
+
+website:
+  title: "MLHO"
+  navbar:
+    left:
+      - href: index.qmd
+        text: Home
+      - text: Articles
+        menu:
+          - text: MLHO vanilla
+            href: Articles/mlho_vanilla.qmd
+          - text: TLDR
+            href: Articles/tldr.qmd
+
+format:
+  html:
+    theme: cosmo
+    css: styles.css
+    toc: true
+    standalone: true
+
+editor: visual
+
