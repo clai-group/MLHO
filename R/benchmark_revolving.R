@@ -52,9 +52,9 @@ benchmark.revolving <- function(MLHO.dat,
   
   
 
-  dbmart.atemporal.wide <- MSMR.lite(dbmart.atemporal, labels_atemporal, binarize, sparsity, jmi, topn, unique(dbmart.atemporal$patient_num), multicore, encounterLevel=FALSE, valuesToMerge, timeBufffer)
+  dbmart.atemporal.wide <- MSMR.me(dbmart.atemporal, labels_atemporal, binarize, sparsity, jmi, topn, unique(dbmart.atemporal$patient_num), multicore, encounterLevel=FALSE, valuesToMerge, timeBufffer)
 
-  # dbmart.temporal.wide <- MSMR.lite(MLHO.dat, labels, binarize, sparsity, jmi, topn, patients, multicore, encounterLevel=TRUE, valuesToMerge, timeBufffer)
+  # dbmart.temporal.wide <- MSMR.me(MLHO.dat, labels, binarize, sparsity, jmi, topn, patients, multicore, encounterLevel=TRUE, valuesToMerge, timeBufffer)
   # 
   # out <- list()
   # out$atemporal.wide <- dbmart.atemporal.wide
