@@ -151,7 +151,7 @@ datatable(dplyr::select(mlho.features,features,DESCRIPTION,`Feature importance`=
 
 now visualizing feature importance
 
-```{r,fig.align='center',fig.width=7,fig.height=7}
+```{r,fig.align='center',fig.width=10,fig.height=5}
 (plot<- ggplot(mlho.features) +
     geom_segment(
       aes(y = 0,
@@ -178,16 +178,14 @@ head(as.data.frame(shap_value))
 
 Using the default plot function, the feature importance are shown below.
 
-```{r}
+```{r,fig.width=10,fig.height=5}
 plot(shap_value)
 mshapviz(shap_value, dbmart.concepts, plot_type = "waterfall", top_n = 5, num = 6)
 mshapviz_all(shap_value, dbmart.concepts, top_n = 5)
 ```
-
 
 ## Notes for more complex implementation
 
 As we recommended above, it's best to at least iterate the training process 5 times, in which case you'll have 5 files containing the important features from MLHO. We do this regularly. If you do so, you can compute the mean/median values for each feature.
 
 Now if you want to get the regression coefficients and compute Odds Ratios (ORs), you can then select the top feature that were selected most frequently in MLHO iterations to run a regression model (pass `glm` to `mlearn`) and extract regression coefficients to then transform to ORs.
-
