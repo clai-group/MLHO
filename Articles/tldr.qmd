@@ -190,23 +190,25 @@ To do so, let's map the concept codes to their "English" translation. *That's wh
 ```{r}
 features = model.test$features
 features$features.new <- sub("_.*", "", features$features )
+features$label = sub(".*_", "", features$features )
 dbmart.concepts <- dbmart[!duplicated(paste0(dbmart$phenx)), c("phenx","DESCRIPTION")]
 mlho.features <- data.frame(merge(features,dbmart.concepts,by.x="features.new",by.y = "phenx"))
-datatable(dplyr::select(mlho.features,features,DESCRIPTION,`Feature importance`=Overall), options = list(pageLength = 5), filter = 'bottom')
+mlho.features$feature.desc = paste(mlho.features$DESCRIPTION, mlho.features$label, sep = "_")
+datatable(dplyr::select(mlho.features,feature.desc,`Feature importance`=Overall), options = list(pageLength = 5), filter = 'bottom')
 ```
 
 now visualizing feature importance
 
-```{r visualisazation_fig,fig.align='center',fig.width=12,fig.height=7}
+```{r visualisazation_fig,fig.align='center',fig.width=10,fig.height=6}
 (plot<- ggplot(mlho.features) +
     geom_segment(
       aes(y = 0,
-          x = reorder(DESCRIPTION,Overall),
+          x = reorder(feature.desc,Overall),
           yend = Overall,
-          xend = DESCRIPTION),
+          xend = feature.desc),
       size=0.5,alpha=0.5) +
     geom_point(
-      aes(x=reorder(DESCRIPTION,Overall),y=Overall),
+      aes(x=reorder(feature.desc,Overall),y=Overall),
       alpha=0.5,size=2,color="red") +
     theme_minimal()+
    coord_flip()+
@@ -222,9 +224,9 @@ shap_value <- model.test$shap
 head(as.data.frame(shap_value))
 ```
 
-```{r,fig.width=12,fig.height=7}
+```{r,fig.width=12,fig.height=5}
 plot(shap_value)
-dbmart.concepts.new = mlho.features %>% select(features, DESCRIPTION)
+dbmart.concepts.new = mlho.features %>% select(features, feature.desc)
 colnames(dbmart.concepts.new) = c("phenx", "DESCRIPTION")
 mshapviz(shap_value, dbmart.concepts.new, plot_type = "waterfall", top_n = 6, num = 1)
 mshapviz_all(shap_value, dbmart.concepts.new, top_n = 5)

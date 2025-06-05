@@ -191,7 +191,7 @@ datatable(dplyr::select(mlho.features,features,DESCRIPTION,`Feature importance`=
 
 now visualizing feature importance
 
-```{r visualisazation_fig,fig.align='center',fig.width=7,fig.height=7}
+```{r visualisazation_fig,fig.align='center',fig.width=11,fig.height=5}
 (plot<- ggplot(mlho.features) +
     geom_segment(
       aes(y = 0,
@@ -216,7 +216,7 @@ shap_value <- model.test$shap
 head(as.data.frame(shap_value))
 ```
 
-```{r}
+```{r,fig.width=11,fig.height=5}
 plot(shap_value)
 dbmart.concepts.new = mlho.features %>% select(features, DESCRIPTION)
 colnames(dbmart.concepts.new) = c("phenx", "DESCRIPTION")
