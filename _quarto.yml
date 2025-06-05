@@ -14,6 +14,9 @@ website:
             href: Articles/mlho_vanilla.qmd
           - text: TLDR
             href: Articles/tldr.qmd
+          - text: Benchmark
+            href: Articles/benchmarrk.qmd
+            
 
 format:
   html:

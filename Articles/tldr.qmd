@@ -73,9 +73,9 @@ dat.train[,value := 1]
 uniqpats.train <- c(as.character(unique(dat.train$patient_num)))
 ```
 
-We use the `MSMR.lite` function from the `MLHO` package to perform a series of transformations and feature selections by labeling each feature by categorizing them to "history", "past", and "last". The parameters include options for sparsity, use of the joint mutual information criterion (`jmi`), the number of top features to select (`topn`), and others that influence how the data is processed and analyzed.
+We use the `MSMR.me` function from the `MLHO` package to perform a series of transformations and feature selections by labeling each feature by categorizing them to "history", "past", and "last". The parameters include options for sparsity, use of the joint mutual information criterion (`jmi`), the number of top features to select (`topn`), and others that influence how the data is processed and analyzed.
 
-![](images/tldr.png) The figure above explains how the features are labeled in `MSMR.lite`. Each patient's data is filtered to process medical encounters sequentially. Events before the first encounter are labeled as "history." For each encounter, data from the current to the last encounter are labeled as "last," and if there is a previous encounter, data from the last encounter to the previous one are labeled as "past." The `buffer` parameter gives flexibility to add a time interval within the infection period. For example, a buffer can be the 14 days of COVID-19 infection by each time label.
+![](images/tldr.png) The figure above explains how the features are labeled in `MSMR.me`. Each patient's data is filtered to process medical encounters sequentially. Events before the first encounter are labeled as "history." For each encounter, data from the current to the last encounter are labeled as "last," and if there is a previous encounter, data from the last encounter to the previous one are labeled as "past." The `buffer` parameter gives flexibility to add a time interval within the infection period. For example, a buffer can be the 14 days of COVID-19 infection by each time label.
 
 Once the data is labeled, all labels (history, past, last) are merged and reformatted into a wide format, where each patient row summarizes counts of each label.
 
@@ -235,4 +235,3 @@ colnames(dbmart.concepts.new) = c("phenx", "DESCRIPTION")
 mshapviz(shap_value, dbmart.concepts.new, plot_type = "waterfall", top_n = 6, num = 1)
 mshapviz_all(shap_value, dbmart.concepts.new, top_n = 5)
 ```
-
