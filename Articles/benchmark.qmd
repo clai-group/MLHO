@@ -10,7 +10,7 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ## Load packages
 
-```{r package loading}
+```{r,echo=TRUE, results = 'hide'}
 
 ##update/install MLHO
 devtools::install_github("clai-group/mlho")

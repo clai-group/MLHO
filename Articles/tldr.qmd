@@ -165,7 +165,6 @@ labelDT <- labelDT %>%
 We use the `mlearn` function to do the modeling, which includes training the model and testing it on the test set.
 
 ```{r}
-## we may want to reduce the output of this cell
 model.test <- mlearn(dat.train,
                      dat.test,
                      dems=NULL,
@@ -189,12 +188,8 @@ Here we create a plot of the feature importance scores for each of the top (here
 To do so, let's map the concept codes to their "English" translation. *That's why we kept that 4th column called `description` in `dbmart`.*
 
 ```{r}
-#TODO FIX! copie from original vignette
-
 features = model.test$features
 features$features.new <- sub("_.*", "", features$features )
-
-#TODO fix merge, cut past/last/history before merging the features with the concepts and append afterwards
 dbmart.concepts <- dbmart[!duplicated(paste0(dbmart$phenx)), c("phenx","DESCRIPTION")]
 mlho.features <- data.frame(merge(features,dbmart.concepts,by.x="features.new",by.y = "phenx"))
 datatable(dplyr::select(mlho.features,features,DESCRIPTION,`Feature importance`=Overall), options = list(pageLength = 5), filter = 'bottom')
@@ -202,8 +197,7 @@ datatable(dplyr::select(mlho.features,features,DESCRIPTION,`Feature importance`=
 
 now visualizing feature importance
 
-```{r visualisazation_fig,fig.align='center',fig.width=7,fig.height=7}
-#TODO FIX
+```{r visualisazation_fig,fig.align='center',fig.width=12,fig.height=7}
 (plot<- ggplot(mlho.features) +
     geom_segment(
       aes(y = 0,
@@ -228,7 +222,7 @@ shap_value <- model.test$shap
 head(as.data.frame(shap_value))
 ```
 
-```{r}
+```{r,fig.width=12,fig.height=7}
 plot(shap_value)
 dbmart.concepts.new = mlho.features %>% select(features, DESCRIPTION)
 colnames(dbmart.concepts.new) = c("phenx", "DESCRIPTION")
