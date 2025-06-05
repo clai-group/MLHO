@@ -15,7 +15,7 @@ website:
           - text: TLDR
             href: Articles/tldr.qmd
           - text: Benchmark
-            href: Articles/benchmarrk.qmd
+            href: Articles/benchmark.qmd
             
 
 format:
